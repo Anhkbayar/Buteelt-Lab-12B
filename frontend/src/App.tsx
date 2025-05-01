@@ -1,7 +1,7 @@
 // src/App.tsx
 import React, { useState } from 'react';
+import './App.css';
 
-// Type definitions
 type User = {
   id: number;
   username: string;
@@ -14,7 +14,7 @@ type AuthFormData = {
   password: string;
 };
 
-type AuthResponse = User | string; // Register returns User, Login returns string
+type AuthResponse = User | string;
 
 const App: React.FC = () => {
   const [formData, setFormData] = useState<AuthFormData>({
@@ -24,13 +24,6 @@ const App: React.FC = () => {
   const [message, setMessage] = useState<string>('');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,11 +35,12 @@ const App: React.FC = () => {
         },
         body: JSON.stringify(formData)
       });
-      
+      console.log(response.body)
+
       if (!response.ok) {
-        throw new Error(`Registration failed with status: ${response.status}`);
+        throw new Error(`Registration failed: ${response.status}`);
       }
-      
+
       const data: User = await response.json();
       setMessage(`Registration successful for user: ${data.username}`);
       setCurrentUser(data);
@@ -65,155 +59,82 @@ const App: React.FC = () => {
         },
         body: JSON.stringify(formData)
       });
+  
+      const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(response.status === 401 
-          ? 'Invalid credentials' 
-          : `Login failed with status: ${response.status}`);
+        throw new Error(data.error || 'Login failed');
       }
-      
-      const data: string = await response.text();
-      setMessage(data);
-      
-      // Fetch user details after successful login
-      const userResponse = await fetch(`http://localhost:8080/api/users?username=${formData.username}`);
-      if (userResponse.ok) {
-        const userData: User = await userResponse.json();
-        setCurrentUser(userData);
-      }
+  
+      setMessage(data.message);
+      setCurrentUser(data.user);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Login failed');
     }
   };
 
   return (
-    <div className="App" style={styles.app}>
-      <h1>Authentication Demo</h1>
-      
+    <div className="App">
+      <h1>Authentication</h1>
+
       {message && (
-        <div style={styles.message}>
+        <div className="message">
           {message}
         </div>
       )}
-      
+
       {currentUser && (
-        <div style={styles.userInfo}>
+        <div className="user-info">
           <h3>Current User</h3>
           <p>Username: {currentUser.username}</p>
+          {/* <p>Password: {currentUser.password}</p> */}
           <p>Role: {currentUser.role}</p>
         </div>
       )}
 
-      <div style={styles.formContainer}>
+      <div className="form-container">
         <h2>Register</h2>
-        <form onSubmit={handleRegister} style={styles.form}>
+        <form onSubmit={handleRegister} className="form">
           <input
             type="text"
             name="username"
             placeholder="Username"
-            value={formData.username}
-            onChange={handleChange}
             required
-            style={styles.input}
           />
           <input
             type="password"
             name="password"
             placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
             required
-            style={styles.input}
           />
-          <button type="submit" style={styles.registerButton}>
+          <button type="submit" className="register-button">
             Register
           </button>
         </form>
       </div>
 
-      <div style={styles.formContainer}>
+      <div className="form-container">
         <h2>Login</h2>
-        <form onSubmit={handleLogin} style={styles.form}>
+        <form onSubmit={handleLogin} className="form">
           <input
             type="text"
             name="username"
             placeholder="Username"
-            value={formData.username}
-            onChange={handleChange}
             required
-            style={styles.input}
           />
           <input
             type="password"
             name="password"
             placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
             required
-            style={styles.input}
           />
-          <button type="submit" style={styles.loginButton}>
+          <button type="submit" className="login-button">
             Login
           </button>
         </form>
       </div>
     </div>
   );
-};
-
-// TypeScript styles
-const styles = {
-  app: {
-    padding: '20px',
-    maxWidth: '400px',
-    margin: '0 auto',
-    fontFamily: 'Arial, sans-serif'
-  },
-  message: {
-    margin: '20px 0',
-    padding: '10px',
-    backgroundColor: '#f0f0f0',
-    borderRadius: '4px'
-  },
-  userInfo: {
-    margin: '20px 0',
-    padding: '15px',
-    backgroundColor: '#e8f5e9',
-    border: '1px solid #c8e6c9',
-    borderRadius: '4px'
-  },
-  formContainer: {
-    marginBottom: '30px',
-    padding: '20px',
-    border: '1px solid #ddd',
-    borderRadius: '4px'
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '10px'
-  },
-  input: {
-    padding: '8px',
-    border: '1px solid #ddd',
-    borderRadius: '4px'
-  },
-  registerButton: {
-    padding: '8px',
-    backgroundColor: '#4CAF50',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer'
-  },
-  loginButton: {
-    padding: '8px',
-    backgroundColor: '#2196F3',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer'
-  }
 };
 
 export default App;
