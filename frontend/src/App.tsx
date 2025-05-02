@@ -27,8 +27,9 @@ const App: React.FC = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Register form: ", formData)
     try {
-      const response = await fetch('http://localhost:8080/register', {
+      const response = await fetch('http://localhost:8080/api/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -51,8 +52,9 @@ const App: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Login data: ", formData)
     try {
-      const response = await fetch('http://localhost:8080/login', {
+      const response = await fetch('http://localhost:8080/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -99,12 +101,14 @@ const App: React.FC = () => {
             type="text"
             name="username"
             placeholder="Username"
+            onChange={(e) => setFormData({...formData, username: e.target.value})}
             required
           />
           <input
             type="password"
             name="password"
             placeholder="Password"
+            onChange={(e) => setFormData({...formData, password: e.target.value})}
             required
           />
           <button type="submit" className="register-button">
@@ -120,12 +124,14 @@ const App: React.FC = () => {
             type="text"
             name="username"
             placeholder="Username"
+            onChange={(e) => setFormData({...formData, username: e.target.value})}
             required
           />
           <input
             type="password"
             name="password"
             placeholder="Password"
+            onChange={(e) => setFormData({...formData, password: e.target.value})}
             required
           />
           <button type="submit" className="login-button">
